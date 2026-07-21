@@ -1,0 +1,15 @@
+{
+  "sampleConnector": {
+    "name": "Test Connector",
+    "type": "API",
+    "description": "Sample connector for testing",
+    "endpoint": "https://api.example.com"
+  },
+  "dbConnector": {
+    "name": "Database Connector",
+    "type": "Database",
+    "description": "Database connection for testing",
+    "host": "localhost",
+    "port": 5432
+  }
+}

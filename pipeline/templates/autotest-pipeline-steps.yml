@@ -1,0 +1,45 @@
+# Azure DevOps Pipeline Template for Automated Tests
+
+parameters:
+  - name: environment
+    type: string
+    default: 'dev'
+  - name: browser
+    type: string
+    default: 'chromium'
+  - name: headless
+    type: boolean
+    default: true
+
+steps:
+  - task: NodeTool@0
+    displayName: 'Install Node.js'
+    inputs:
+      versionSpec: '18.x'
+
+  - script: npm ci
+    displayName: 'Install dependencies'
+
+  - script: npx playwright install --with-deps
+    displayName: 'Install Playwright browsers'
+
+  - script: npm run test
+    displayName: 'Run Playwright tests'
+    env:
+      ENV: ${{ parameters.environment }}
+      BROWSER: ${{ parameters.browser }}
+      HEADLESS: ${{ parameters.headless }}
+
+  - task: PublishTestResults@2
+    displayName: 'Publish test results'
+    condition: always()
+    inputs:
+      testResultsFormat: 'JUnit'
+      testResultsFiles: '**/test-results.xml'
+
+  - task: PublishBuildArtifacts@1
+    displayName: 'Publish HTML report'
+    condition: always()
+    inputs:
+      PathtoPublish: 'playwright-report'
+      ArtifactName: 'playwright-report'
