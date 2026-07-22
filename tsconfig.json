@@ -9,6 +9,7 @@
     "strict": true,
     "skipLibCheck": true,
     "typeRoots": ["./node_modules/@types", "./types"],
+    "types": ["node"],
     "paths": {
       "@pages/*": ["./src/pages/*"],
       "@utils/*": ["./src/utils/*"],
@@ -22,6 +23,6 @@
       "@helper/*": ["./helper/*"]
     }
   },
-  "include": ["src", "tests", "types", "playwright.config.ts", "constants", "helper", "report"],
+  "include": ["src", "tests", "types", "playwright.config.ts", "playwright.bdd.config.ts", "constants", "helper", "report"],
   "exclude": ["tests/examples", "src/pages/examples"]
 }

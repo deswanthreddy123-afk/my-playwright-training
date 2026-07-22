@@ -1,0 +1,58 @@
+{
+  "cookies": [
+    {
+      "name": "authentik_device",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzdWIiOiJkNDI0ZDE0MGYwNjkzNWY0MzQ1NTY2MTNlZDcxOWMzMTUxYWU3NDVmM2YyNmM4MGUwMjgwNzMxOWRjOGE3NzA4IiwiZXhwIjoxNzg3Mjk0MjA0Ljg1OTQyNn0.x3D3WwRk81WCcGIaFwZ_FewVaZexMQTq3wvCA57Gy6k",
+      "domain": "authentik.sperrydigital-dev.ienergy.halliburton.com",
+      "path": "/",
+      "expires": 1787294204.820293,
+      "httpOnly": false,
+      "secure": false,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authentik_csrf",
+      "value": "ZuUo3Wjqe5xtjRWButJcYmmOZrJlB6Ti",
+      "domain": "authentik.sperrydigital-dev.ienergy.halliburton.com",
+      "path": "/",
+      "expires": 1816151804.8204,
+      "httpOnly": false,
+      "secure": true,
+      "sameSite": "Lax"
+    },
+    {
+      "name": "authentik_session",
+      "value": "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJzaWQiOiIzbzNpYWV5b2kybW02cGNjdnd6NGQ0aWF1amVlOHh1cyIsImlzcyI6ImF1dGhlbnRpayIsInN1YiI6ImQ0MjRkMTQwZjA2OTM1ZjQzNDU1NjYxM2VkNzE5YzMxNTFhZTc0NWYzZjI2YzgwZTAyODA3MzE5ZGM4YTc3MDgiLCJhdXRoZW50aWNhdGVkIjp0cnVlLCJhY3IiOiJnb2F1dGhlbnRpay5pby9jb3JlL2RlZmF1bHQifQ.ezJhiTcS0L1oWjsvfDe5As9vNQnutsulrw8bq0BTbjo",
+      "domain": "authentik.sperrydigital-dev.ienergy.halliburton.com",
+      "path": "/",
+      "expires": -1,
+      "httpOnly": true,
+      "secure": true,
+      "sameSite": "None"
+    }
+  ],
+  "origins": [
+    {
+      "origin": "https://test.sperrydigital.ienergy.halliburton.com",
+      "localStorage": [
+        {
+          "name": "theme",
+          "value": "dark"
+        },
+        {
+          "name": "shell:side-nav",
+          "value": "{\"sideNavCollapsed\":false}"
+        }
+      ]
+    },
+    {
+      "origin": "https://authentik.sperrydigital-dev.ienergy.halliburton.com",
+      "localStorage": [
+        {
+          "name": "authentik-remember-me-session",
+          "value": ""
+        }
+      ]
+    }
+  ]
+}

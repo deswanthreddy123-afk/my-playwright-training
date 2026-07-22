@@ -1,6 +1,7 @@
 import { defineConfig, devices, PlaywrightTestProject } from '@playwright/test';
 import { defineBddConfig } from 'playwright-bdd';
 import { getConfig } from './src/config/env';
+import { STORAGE_STATE } from './src/config/globalSetup';
 
 const cfg = getConfig();
 
@@ -31,13 +32,14 @@ function getBrowserConfig(browser: string): Partial<PlaywrightTestProject['use']
 
 const testDir = defineBddConfig({
   paths: ['tests/e2e/features/*.feature'],
-  require: ['tests/e2e/steps/*.ts', 'src/fixtures/bdd-fixtures.ts'],
+  require: ['tests/e2e/steps/**/*.ts', 'src/fixtures/bdd-fixtures.ts'],
   disableWarnings: { importTestFrom: true },
 });
 
 export default defineConfig({
   testDir,
   fullyParallel: false,
+  timeout: 180000,
   workers: process.env.WORKERS ? Number.parseInt(process.env.WORKERS, 10) : 1,
   forbidOnly: !!process.env.CI,
   retries: process.env.CI ? 2 : 0,
@@ -49,6 +51,7 @@ export default defineConfig({
   globalSetup: require.resolve('./src/config/globalSetup.ts'),
   use: {
     baseURL: cfg.baseURL,
+    storageState: STORAGE_STATE,
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',
@@ -56,6 +59,8 @@ export default defineConfig({
     ignoreHTTPSErrors: true,
     actionTimeout: 15000,
     navigationTimeout: 30000,
+    geolocation: { latitude: 29.7604, longitude: -95.3698 },
+    permissions: ['geolocation'],
   },
   projects: [
     {
