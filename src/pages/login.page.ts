@@ -1,4 +1,6 @@
-import { Page, Locator } from '@playwright/test';
+import { expect, Page, Locator } from '@playwright/test';
+import * as path from 'node:path';
+import { URL } from 'node:url';
 
 export class LoginPage {
   downloadFile() {
@@ -22,9 +24,9 @@ export class LoginPage {
   Overwrite = 'button[data-pc-name="button"].p-button-text:has(.pi-upload), button.p-button-text:has-text("Overwrite")';
   OverwriteCancel = 'button[data-pc-name="button"].p-button-text:has(.pi-upload), button.p-button-text:has-text("Overwrite")';
   // uploadFilePath = 'C:\\Users\\Deswanth.Reddy\\Downloads\\Automation-Testing.png';
- uploadFilePath  = "C:\\Users\\Deswanth.Reddy\\Downloads\\Testing.jpg";
+ uploadFilePath  = path.resolve(__dirname, '../../testdata/Testing.jpg');
  // Image used for the Plan Version section scenarios.
- uploadFilePath2 = "C:\\Users\\Deswanth.Reddy\\Downloads\\Testing.jpg";
+ uploadFilePath2 = path.resolve(__dirname, '../../testdata/Testing.jpg');
 
   constructor(page: Page) { 
     this.page = page;
@@ -75,35 +77,107 @@ export class LoginPage {
 
   public DOSUrl =
     'https://test.sperrydigital.ienergy.halliburton.com/digital-design-of-service/home';
+  public plannedOperationsUrl =
+    'https://test.sperrydigital.ienergy.halliburton.com/digital-design-of-service/planned-operations?job=96f99f6b-6b24-4cea-9ff8-613eed2948ea';
+
+  async openDesignTrajectory(): Promise<void> {
+    // Duplicate home-page cards share well/wellbore names but reference different designs.
+    const url = new URL('/digital-design-of-service/trajectory', this.DOSUrl);
+    url.searchParams.set('job', 'f67c6a06-8c6d-467e-8e7f-bcc5e4a417ce');
+    await this.page.goto(url.href, { waitUntil: 'domcontentloaded' });
+    await expect(this.page.locator('.well-select').getByRole('combobox')).toHaveText(
+      'Deswanth Well',
+      { timeout: 30000 },
+    );
+    await expect(this.page.locator('.wellbore-select').getByRole('combobox')).toHaveText(
+      'Deswanth Wellbore',
+      { timeout: 30000 },
+    );
+    await expect(
+      this.page.locator('.design-name-value'),
+      'Expected Deswanth Design, not a duplicate well design',
+    ).toHaveText('Deswanth Design', { timeout: 30000 });
+    await expect(this.page).toHaveURL(url.href);
+  }
 
   async login(): Promise<void> {
-    // With a valid storageState session, authentik redirects away before the
-    // login form appears. Check for the form first; if it never shows, the
-    // session is already active and no credentials need to be entered.
     const emailField = this.page.getByPlaceholder(this.emailInput);
-    const formVisible = await emailField
-      .waitFor({ state: 'visible', timeout: 10000 })
-      .then(() => true)
-      .catch(() => false);
-
-    if (formVisible) {
+    const isAuthenticated = () => /\/if\/user(?:\/|$)|\/library(?:\/|$)/.test(
+      new URL(this.page.url()).pathname,
+    );
+    if (!isAuthenticated()) {
+      await emailField.waitFor({ state: 'visible', timeout: 30000 });
       await emailField.fill(this.username);
       await this.page.getByPlaceholder(this.passwordInput).fill(this.password);
       await this.page.locator(this.loginButton).click();
-      // After login, authentik redirects to its library page (still an authentik
-      // URL). Wait for the form to disappear as the signal that auth completed.
-      await this.page
-        .waitForURL(/\/if\/user|\/library/, { timeout: 60000 })
-        .catch(() => emailField.waitFor({ state: 'hidden', timeout: 60000 }))
-        .catch(() => undefined);
+      await this.page.waitForURL(/\/if\/user(?:\/|$)|\/library(?:\/|$)/, { timeout: 60000 });
     }
-    await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => undefined);
+    console.log('[Login] Authentik login completed.');
   }
 
   async gotoDOS() {
     await this.page.goto(this.DOSUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
     await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => undefined);
     await this.page.waitForTimeout(5000);
+
+    const appUrl = new URL(this.DOSUrl);
+    const currentUrl = new URL(this.page.url());
+    if (
+      currentUrl.hostname !== appUrl.hostname ||
+      !currentUrl.pathname.startsWith('/digital-design-of-service/')
+    ) {
+      throw new Error('DOS authentication did not complete; the browser did not reach the DOS application.');
+    }
+  }
+
+  async gotoPlannedOperations(): Promise<void> {
+    await this.page.goto(this.plannedOperationsUrl, {
+      waitUntil: 'domcontentloaded',
+      timeout: 60000,
+    });
+    await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => undefined);
+
+    const targetUrl = new URL(this.plannedOperationsUrl);
+    const currentUrl = new URL(this.page.url());
+    if (
+      currentUrl.hostname !== targetUrl.hostname ||
+      currentUrl.pathname !== targetUrl.pathname ||
+      currentUrl.searchParams.get('job') !== targetUrl.searchParams.get('job')
+    ) {
+      throw new Error(
+        `DOS authentication did not complete; current page is ${currentUrl.hostname}${currentUrl.pathname}.`,
+      );
+    }
+  }
+
+  // When the app redirects to the authentik chooser, click "Login with Halliburton
+  // Account" and complete the Microsoft sign-in using the credentials above.
+  async signInWithHalliburtonAccount(): Promise<void> {
+    const chooserButton = this.page.getByText('Login with Halliburton Account');
+    const onChooser = await chooserButton
+      .waitFor({ state: 'visible', timeout: 15000 })
+      .then(() => true)
+      .catch(() => false);
+    if (onChooser) {
+      await chooserButton.click();
+    } else if (new URL(this.page.url()).hostname !== 'login.microsoftonline.com') {
+      return;
+    }
+
+    const msEmail = this.page.locator('input[name="loginfmt"]');
+    await msEmail.waitFor({ state: 'visible', timeout: 30000 });
+    await msEmail.fill(this.username);
+    await this.page.locator('#idSIButton9').click();
+    const msPassword = this.page.locator('input[name="passwd"]');
+    await msPassword.waitFor({ state: 'visible', timeout: 30000 });
+    await msPassword.fill(this.password);
+    await this.page.locator('#idSIButton9').click();
+    // Optional "Stay signed in?" prompt.
+    const staySignedIn = this.page.locator('#idSIButton9');
+    if (await staySignedIn.isVisible({ timeout: 3000 }).catch(() => false)) {
+      await staySignedIn.click();
+    }
+    await this.page.waitForURL(/test\.sperrydigital\.ienergy\.halliburton\.com/, { timeout: 60000 });
   }
   async clickAllWells() {
     // Wait for the DOS home loading overlay to be fully removed from the DOM.
@@ -114,7 +188,11 @@ export class LoginPage {
   }
 
   async clickDeswanthWellCard() {
-    await this.page.locator('.card-title').filter({ hasText: this.DeswanthWellCard }).first().click();
+    const wellCard = this.page.locator('.card-title').filter({
+      hasText: /^\s*Deswanth Well\s*$/,
+    });
+    await expect(wellCard, 'Exactly one Deswanth Well card must be available').toHaveCount(1);
+    await wellCard.click();
     await this.page.waitForTimeout(5000);
  }
  async navigateTrajectorytab() {
@@ -124,53 +202,16 @@ export class LoginPage {
    await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => undefined);    
   }
 
-  // Cached URL discovered after the first full navigation. Once set, all
-  // subsequent scenarios skip the navigation and use a single goto.
-  private static cachedTrajectoryUrl: string = '';
-
-  // Navigate to the Trajectory page.
-  //
-  // Short path (used when the Background has already navigated to the DOS app):
-  //   If the page URL is already inside the app (not blank, not authentik),
-  //   click the Deswanth Well card and then the Trajectory link directly.
-  //
-  // Cached-URL path (scenarios 2–N within the same worker process):
-  //   Navigate directly to the cached trajectory URL — one goto instead of
-  //   multiple sequential clicks.
-  //
-  // Full path (first scenario, no Background, or recovery after failure):
-  //   authentik login → DOS home → All Wells → Deswanth Well card → Trajectory.
   async ensureOnTrajectoryPage() {
-    const url = this.page.url();
-    if (url.includes('/trajectory')) return;
-
-    if (LoginPage.cachedTrajectoryUrl) {
-      await this.page.goto(LoginPage.cachedTrajectoryUrl, { waitUntil: 'domcontentloaded', timeout: 60000 });
-      await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => undefined);
-      await this.page.waitForTimeout(2000);
-      return;
+    const url = new URL(this.page.url());
+    const isInApp = url.hostname === new URL(this.DOSUrl).hostname;
+    if (!isInApp || url.pathname.includes('/trajectory')) {
+      await this.gotoDOS();
+      await this.clickAllWells();
     }
 
-    // If the Background already navigated to the DOS app (home / All Wells page),
-    // take the short path: click the well card then the Trajectory link.
-    const isInApp = url.includes('sperrydigital.ienergy.halliburton.com') && !url.includes('authentik');
-    if (isInApp) {
-      await this.clickDeswanthWellCard();
-      await this.navigateTrajectorytab();
-      if (this.page.url().includes('/trajectory')) {
-        LoginPage.cachedTrajectoryUrl = this.page.url();
-        return;
-      }
-    }
-
-    // Full path — runs on first scenario when there is no Background.
-    await this.navigate();              // open authentik login URL
-    await this.login();                 // fill credentials (or skip if session active)
-    await this.gotoDOS();               // navigate to DOS home page
-    await this.clickAllWells();         // click All Wells
-    await this.clickDeswanthWellCard(); // select Deswanth Well
-    await this.navigateTrajectorytab(); // click Trajectory in the left panel
-    LoginPage.cachedTrajectoryUrl = this.page.url();
+    await this.clickDeswanthWellCard();
+    await this.navigateTrajectorytab();
   }
 
   // Re-navigate to the Trajectory tab without re-login (used between panels in combined spec).
@@ -180,7 +221,7 @@ export class LoginPage {
     await this.page.waitForTimeout(3000);
     await this.page.getByText(this.allWellsButton).waitFor({ state: 'visible', timeout: 90000 });
     await this.page.getByText(this.allWellsButton).click();
-    await this.page.locator('.card-title').filter({ hasText: this.DeswanthWellCard }).first().click();
+    await this.clickDeswanthWellCard();
     await this.page.waitForTimeout(3000);
     await this.page.click(this.Trajectorytab);
     await this.page.waitForLoadState('networkidle', { timeout: 15000 }).catch(() => undefined);

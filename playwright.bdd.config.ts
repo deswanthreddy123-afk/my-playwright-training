@@ -31,7 +31,7 @@ function getBrowserConfig(browser: string): Partial<PlaywrightTestProject['use']
 }
 
 const testDir = defineBddConfig({
-  paths: ['tests/e2e/features/*.feature'],
+  paths: ['tests/e2e/features/**/*.feature'],
   require: ['tests/e2e/steps/**/*.ts', 'src/fixtures/bdd-fixtures.ts'],
   disableWarnings: { importTestFrom: true },
 });

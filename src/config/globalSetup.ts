@@ -58,26 +58,36 @@ function logServerFailure(): void {
   console.error(`💡 Make sure to run 'npm run start:mcp' or check if port 4000 is available`);
 }
 
-async function globalSetup(_config: FullConfig) {
+async function globalSetup(config: FullConfig) {
   // Wait for MCP server to be available
   await waitForMcpServer();
 
-  // Log in ONCE and persist the authenticated session so every scenario reuses
-  // it instead of logging in again.
-  await createAuthenticatedSession();
+  const reuseSession = process.env.REUSE_SESSION === 'true';
+  if (reuseSession && !fs.existsSync(STORAGE_STATE)) {
+    throw new Error('No saved session found. Run node scripts/save-session.js to sign in and save one.');
+  }
+
+  if (reuseSession) {
+    console.log(`♻️ Reusing saved session ${STORAGE_STATE}`);
+  } else {
+    await createAuthenticatedSession(config);
+  }
 
   console.log('🚀 Global setup completed - tests ready to run!');
 }
 
-async function createAuthenticatedSession(): Promise<void> {
+async function createAuthenticatedSession(config: FullConfig): Promise<void> {
   console.log('🔐 Performing one-time login to create shared session...');
 
   const browser = await chromium.launch({
+    headless: config.projects[0]?.use.headless ?? false,
     args: ['--ignore-certificate-errors', '--ignore-ssl-errors'],
   });
   const context = await browser.newContext({
     ignoreHTTPSErrors: true,
     viewport: { width: 1920, height: 1080 },
+    geolocation: { latitude: 29.7604, longitude: -95.3698 },
+    permissions: ['geolocation'],
   });
   const page = await context.newPage();
 
@@ -85,8 +95,7 @@ async function createAuthenticatedSession(): Promise<void> {
     const loginPage = new LoginPage(page);
     await loginPage.navigate();
     await loginPage.login();
-    // Establish the app-domain session so its cookies/localStorage are captured.
-    await loginPage.gotoDOS();
+    await loginPage.gotoPlannedOperations();
 
     fs.mkdirSync(path.dirname(STORAGE_STATE), { recursive: true });
     await context.storageState({ path: STORAGE_STATE });

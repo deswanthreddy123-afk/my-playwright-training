@@ -1,6 +1,6 @@
 import { createBdd } from 'playwright-bdd';
-import { test } from '../../../src/fixtures/bdd-fixtures';
-import { LoginPage } from '../../../src/pages/login.page';
+import { test } from '../../../../src/fixtures/bdd-fixtures';
+import { LoginPage } from '../../../../src/pages/login.page';
 
 const { Given, When, Then } = createBdd(test);
 
@@ -47,44 +47,53 @@ When('the user navigates to the Trajectory tab', async ({ loginPage }) => {
 
 // ─── Well Details panel steps ─────────────────────────────────────────────────
 
-When('the user expands the Well Details panel', async ({ loginPage }) => {
-  await loginPage.clickdropdownpannel();
+Given('the user opens the Deswanth Design Trajectory', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.openDesignTrajectory();
 });
 
-Then('the user deletes an existing file', async ({ loginPage }) => {
-  await loginPage.deleteIfExists(0);
+When('the user expands the Well Details panel', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.expandPanel();
 });
 
-When('the user uploads a file', async ({ loginPage }) => {
-  await loginPage.uploadFile();
+Then('the user deletes an existing file', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.ensureFile();
+  await wellDetailsPage.deleteFile();
 });
 
-Then('the user cancels the delete action', async ({ loginPage }) => {
-  await loginPage.clickDeleteButtonCancel(0);
+When('the user uploads a file', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.upload();
 });
 
-Then('the user confirms the delete action', async ({ loginPage }) => {
-  await loginPage.clickDeleteButton(0);
+Then('the user cancels the delete action', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.cancelDelete();
 });
 
-Then('the user uploads a second file', async ({ loginPage }) => {
-  await loginPage.uploadFile1();
+Then('the user confirms the delete action', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.confirmDelete();
 });
 
-Then('the user uploads a file to Schematic', async ({ loginPage }) => {
-  await loginPage.uploadFile2();
+Then('the user uploads a second file', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.uploadSecond();
 });
 
-Then('the user downloads the file', async ({ loginPage }) => {
-  await loginPage.clickDownloadButton(0);
+Then('the user uploads a file to Schematic', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.upload();
 });
 
-Then('the user cancels the overwrite action', async ({ loginPage }) => {
-  await loginPage.clickOverwriteCancel();
+Then('the user downloads the file', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.downloadFile();
 });
 
-Then('the user overwrites the file', async ({ loginPage }) => {
-  await loginPage.clickOverwrite();
+When('the user attempts to overwrite the Well Details file', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.beginOverwrite();
+});
+
+Then('the user cancels the overwrite action', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.cancelOverwrite();
+});
+
+Then('the user overwrites the file', async ({ wellDetailsPage }) => {
+  await wellDetailsPage.overwrite();
 });
 
 Then('the user deletes an existing file or uploads a new one', async ({ loginPage }) => {

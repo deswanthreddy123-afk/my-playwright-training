@@ -1,5 +1,6 @@
 import { defineConfig, devices, PlaywrightTestProject } from '@playwright/test';
 import { getConfig } from './src/config/env';
+import { STORAGE_STATE } from './src/config/globalSetup';
 
 const cfg = getConfig();
 
@@ -43,6 +44,9 @@ export default defineConfig({
   globalSetup: require.resolve('./src/config/globalSetup.ts'),
   use: {
     baseURL: cfg.baseURL,
+    storageState: STORAGE_STATE,
+    geolocation: { latitude: 29.7604, longitude: -95.3698 },
+    permissions: ['geolocation'],
     trace: 'on-first-retry',
     screenshot: 'only-on-failure',
     video: 'retain-on-failure',

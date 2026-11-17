@@ -1,53 +1,14 @@
-import { test } from '@playwright/test';
-import { HomePage } from '../../src/pages/HomePage';
-import { LoginPage } from '../../src/pages/LoginPage';
+import { expect, test } from '@playwright/test';
+import { LoginPage } from '../../src/pages/login.page';
 
-/**
- * UI Test Suite - TEMPLATE
- *
- * TODO: Customize these tests for your application
- * - Update test data (usernames, passwords)
- * - Modify assertions to match your app's behavior
- * - Add more test cases as needed
- *
- * See tests/examples folder for app-specific test examples
- */
-test.describe('UI - Home', () => {
-  test('should login and verify user is logged in', async ({ page }) => {
+test.describe('UI - DOS Planned Operations', () => {
+  test('loads the requested planned-operations job', async ({ page }) => {
     const login = new LoginPage(page);
-    const home = new HomePage(page);
 
-    // TODO: Replace with your test credentials
-    await login.goto();
-    await login.login('your-username', 'your-password');
+    await login.gotoPlannedOperations();
 
-    await home.goto();
-    await home.verifyLoggedIn();
+    await expect(page).toHaveURL(
+      /test\.sperrydigital\.ienergy\.halliburton\.com\/digital-design-of-service\/planned-operations\?job=96f99f6b-6b24-4cea-9ff8-613eed2948ea/,
+    );
   });
-
-  test('should navigate to a section', async ({ page }) => {
-    const login = new LoginPage(page);
-    const home = new HomePage(page);
-
-    // TODO: Replace with your test credentials and section name
-    await login.goto();
-    await login.login('your-username', 'your-password');
-
-    await home.goto();
-    await home.navigateToSection('Settings'); // TODO: Replace with your section
-  });
-
-  test('should perform search', async ({ page }) => {
-    const login = new LoginPage(page);
-    const home = new HomePage(page);
-
-    // TODO: Replace with your test credentials and search query
-    await login.goto();
-    await login.login('your-username', 'your-password');
-
-    await home.goto();
-    await home.search('test query'); // TODO: Replace with your search term
-  });
-
-  // TODO: Add more test cases specific to your application
 });

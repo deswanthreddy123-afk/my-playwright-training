@@ -4,6 +4,8 @@
   "description": "Enterprise Playwright testing framework with BDD support and MCP self-healing selectors",
   "main": "index.js",
   "scripts": {
+    "auth:save": "node ./scripts/save-session.js",
+    "test:direct": "concurrently \"npm run start:mcp\" \"cross-env REUSE_SESSION=true playwright test --project ui-* --headed\" -k --success first",
     "test": "concurrently \"npm run start:mcp\" \"playwright test\" -k",
     "test:ui": "concurrently \"npm run start:mcp\" \"playwright test --project ui-*\" -k",
     "test:api": "concurrently \"npm run start:mcp\" \"playwright test --project api\" -k",

@@ -52,6 +52,114 @@ This framework addresses common UI testing challenges including dynamic content,
 
 ### Running Tests:
 
+DOS runs log in at the configured Authentik login page before opening the
+planned-operations job. Login failures stop setup rather than saving an
+unauthenticated session. Set `REUSE_SESSION=true` to explicitly reuse
+`.auth/user.json` instead. If that session is rejected by the test site, refresh
+it with `node scripts/save-session.js` and complete sign-in in the opened browser.
+
+For direct access in headed mode, run `npm run auth:save` once and complete the
+test site's sign-in (including MFA if prompted). Keep the browser open until
+the script confirms the session is saved. Then run `npm run test:direct`.
+That command reuses the saved session and does not enter credentials again.
+Repeat session saving if the test site expires the session.
+
+UI and BDD tests, login setup, and session saving grant geolocation permission
+and use Houston coordinates (latitude `29.7604`, longitude `-95.3698`).
+This controls the browser location API, not the computer's actual location.
+
+Trajectory feature files are grouped under `tests/e2e/features/Trajectory/`.
+Matching step definitions are in `tests/e2e/steps/Trajectory/`, and page objects
+are in `src/pages/Trajectory/`. Shared login and file-panel helpers remain in
+`src/pages/`.
+BDD generation discovers feature files recursively, including this folder.
+
+Trajectory scenarios select the exact `Deswanth Well` card each time rather than
+reusing a trajectory URL from another scenario. Missing or duplicate exact
+matches fail before any file actions are performed.
+
+`Well-Details.feature` opens the verified `Deswanth Well / Deswanth Wellbore /
+Deswanth Design` job (`f67c6a06-8c6d-467e-8e7f-bcc5e4a417ce`) directly because
+two home-page cards share the same well and wellbore names. It verifies all three
+names before file actions, scopes those actions to the Well Details panel, and
+creates its own file preconditions so individual scenarios can run independently.
+Downloads are saved under the scenario's test-results directory and checked
+against the uploaded fixture.
+
+`Plan-Version.feature` covers the current Plan Revisions table, not file uploads.
+Its nine cases verify table/author rendering, unchanged and incomplete revision
+validation, valid draft enablement, adding a draft, and cancelling/confirming
+draft deletion. Edits remain local: these cases do not save over existing
+revisions or verify persisted Save behavior.
+
+`Well-Plan-Consideration.feature` uses the same verified Deswanth Design job.
+Its upload, delete, download, and overwrite scenarios operate only inside the
+Well Plan & Consideration panel, with their own file preconditions. Shared
+trajectory file-panel helpers keep its behavior consistent with Well Details.
+
+`Targets-Sizing.feature` and `Directional-Plot.feature` use this same direct
+design navigation and shared file-panel helpers, scoped to their respective
+panels. Both use `testdata/Testing.jpg` (an accepted image format), create
+independent file preconditions, verify download bytes, and open the actual
+overwrite confirmation before accepting or cancelling it.
+
+`3D-Plot.feature` mirrors the nine Directional Plot file-management scenarios
+using the same verified design and fixture, with all actions scoped to the
+3D Plot panel. Existing files with other names are left untouched.
+
+`CF-Ladder-TC-Plot.feature` covers eight file-management scenarios for each of
+CF Plot, Ladder Plot, and TC Plot (24 total). It uses the same verified design
+and shared file helpers, with each uploader and file row scoped to its exact
+named subsection rather than a page-level file index. Download bytes and actual
+delete/overwrite confirmations are verified; unrelated files are left untouched.
+
+`Anti-Collision-Overview.feature` opens the same verified Deswanth Design and
+fills the six questionnaire answers from the reference image: planned survey
+`TEST`, backup survey `SAMPLE`, magnetic interference `DEMO`, policy `sensor`,
+more stringent policy `Yes`, and sigma `3`. It verifies the displayed values
+using question-scoped inputs, without relying on generated field IDs. It does
+not mark the section completed or test reload persistence.
+
+A second scenario opens Add Well, fills the reference image's `DESHU` / `3124`
+entry, and clicks Add. It verifies all 15 values in the new summary row,
+including the calculated, disabled Offshore well (`No`) and PTD Level (`Level 3`)
+fields. Comments remain blank. Each run adds a row rather than deleting or
+modifying existing rows; it does not click the page-level Save control.
+All reference values are user-supplied test data, not engineering recommendations.
+
+`Risk-Assessment.feature` opens the verified Deswanth Design, expands Risk
+Assessment, and selects the existing `DESHU` offset-well tab. It fills all 12
+questionnaire textareas with the reference answer `Sensors`, locating each by
+its question's `aria-label`, and verifies the count and every answer. The DESHU
+summary entry must already exist; the test does not create other wells, change
+completion switches, click page-level Save, or verify reload persistence.
+The supplied answers are test data, not engineering recommendations.
+
+`Well-Planning-Checklist.feature` opens the same verified Deswanth Design,
+expands Well Planning Checklist, clicks Start (or Edit for a saved checklist),
+and opens Wellplan Components.
+It checks the WP1, WP2, MWDC, and DDC select-all headers by their accessible
+labels and verifies all four headers and 103 component checkboxes are selected.
+It then opens Anti-Collision Analysis, selects WP1, WP2, and DDC, and verifies
+all three headers and 27 analysis checkboxes. It clicks the checklist's Save
+button and reloads the design to verify all 130 selections were persisted.
+On unchanged repeat runs, the app disables Save. The test explicitly logs that
+state and verifies the persisted selections after reload without another Save.
+The sign-off count must remain unchanged; the test does not sign approvals.
+
+`DES-Verification-Checklist.feature` expands DES Verification Checklist on the
+same design, clicks Edit, and selects Yes to all in each of the 12 questionnaire
+tabs. Of 97 questions, 96 are editable and are verified as Yes. The Anticollision
+sigma question is not changed by the bulk button, so editable Yes radios are
+also selected through normal UI controls after each bulk action. The Anticollision
+question "Is the selected policy more stringent than Halliburton Standard?" is
+read-only: its existing answer is captured and must remain unchanged.
+The test saves changes and reloads the design to verify every expected answer
+persisted (100% progress alone is insufficient).
+Sign-Offs & Approvals and Sign Document are not operated. Unchanged repeat runs
+explicitly log a disabled Save and still verify persisted answers after reload.
+These are user-requested test-site answers, not engineering certification.
+
 ```bash
 # Install dependencies
 npm install
