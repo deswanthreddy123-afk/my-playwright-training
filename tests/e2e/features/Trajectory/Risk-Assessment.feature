@@ -9,7 +9,7 @@ Feature: Risk Assessment questionnaire
     And the user expands the Risk Assessment panel
     And the user selects the "DESHU" Risk Assessment tab
 
-  @risk-assessment
+  @risk-assessment     
   Scenario: Fill all DESHU risk answers from the reference image
     When the user answers the following Risk Assessment questions with "Sensors":
       | Does proximity interval share same TVD?                                                           |
