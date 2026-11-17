@@ -3,6 +3,9 @@ Feature: Plan Version revision management
   # Well: Deswanth Well / Deswanth Wellbore / Deswanth Design
   # Revisions are edited as local drafts; existing saved revisions are not changed.
 
+   # Well: Deswanth Well / Deswanth Wellbore / Deswanth Design
+  # Revisions are edited as local drafts; existing saved revisions are not changed.
+
   Background:
     Given the user opens the Deswanth Design for Plan Version
 
@@ -41,7 +44,7 @@ Feature: Plan Version revision management
     When the user adds an unsaved plan revision
     Then the user cancels deleting the unsaved plan revision
 
-  @plan-version
+  @plan-version              
   Scenario: Delete an unsaved revision
     When the user adds an unsaved plan revision
     Then the user confirms deleting the unsaved plan revision
