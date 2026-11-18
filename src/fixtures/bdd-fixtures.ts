@@ -11,6 +11,12 @@ import { AntiCollisionOverviewPage } from '../pages/Trajectory/anti-collision-ov
 import { RiskAssessmentPage } from '../pages/Trajectory/risk-assessment.page';
 import { WellPlanningChecklistPage } from '../pages/Trajectory/well-planning-checklist.page';
 import { DesVerificationChecklistPage } from '../pages/Trajectory/des-verification-checklist.page';
+import { OffsetWellDetailsPage } from '../pages/Offset Well Analysis/offset-well-details.page';
+import { OffsetWellRunDetailsPage } from '../pages/Offset Well Analysis/offset-well-run-details.page';
+import { DdrSummaryPage } from '../pages/Offset Well Analysis/ddr-summary.page';
+import { NoDrillingSurprisesPage } from '../pages/Offset Well Analysis/no-drilling-surprises.page';
+import { SectionObjectivesAndKpisPage } from '../pages/Engineering & Modeling/Drilling Engineering/section-objectives-and-kpis.page';
+import { RiskManagementPrognosisPage } from '../pages/Engineering & Modeling/Drilling Engineering/risk-management-prognosis.page';
 
 type Fixtures = {
   loginPage: LoginPage;
@@ -27,6 +33,12 @@ type Fixtures = {
   riskAssessmentPage: RiskAssessmentPage;
   wellPlanningChecklistPage: WellPlanningChecklistPage;
   desVerificationChecklistPage: DesVerificationChecklistPage;
+  offsetWellDetailsPage: OffsetWellDetailsPage;
+  offsetWellRunDetailsPage: OffsetWellRunDetailsPage;
+  ddrSummaryPage: DdrSummaryPage;
+  noDrillingSurprisesPage: NoDrillingSurprisesPage;
+  sectionObjectivesAndKpisPage: SectionObjectivesAndKpisPage;
+  riskManagementPrognosisPage: RiskManagementPrognosisPage;
 };
 
 export const test = base.extend<Fixtures>({
@@ -72,6 +84,24 @@ export const test = base.extend<Fixtures>({
   },
   desVerificationChecklistPage: async ({ page }, use) => {
     await use(new DesVerificationChecklistPage(page));
+  },
+  offsetWellDetailsPage: async ({ page }, use) => {
+    await use(new OffsetWellDetailsPage(page));
+  },
+  offsetWellRunDetailsPage: async ({ page }, use) => {
+    await use(new OffsetWellRunDetailsPage(page));
+  },
+  ddrSummaryPage: async ({ page }, use) => {
+    await use(new DdrSummaryPage(page));
+  },
+  noDrillingSurprisesPage: async ({ page }, use) => {
+    await use(new NoDrillingSurprisesPage(page));
+  },
+  sectionObjectivesAndKpisPage: async ({ page }, use) => {
+    await use(new SectionObjectivesAndKpisPage(page));
+  },
+  riskManagementPrognosisPage: async ({ page }, use) => {
+    await use(new RiskManagementPrognosisPage(page));
   },
 });
 

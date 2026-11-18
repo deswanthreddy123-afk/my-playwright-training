@@ -107,6 +107,79 @@ overwrite confirmation before accepting or cancelling it.
 using the same verified design and fixture, with all actions scoped to the
 3D Plot panel. Existing files with other names are left untouched.
 
+`Offset Well Analysis/Offset-Well-Details.feature` runs the same nine scenarios
+in the Offset Well Details section. It opens the verified design, then uses the
+sidebar to go to Offset Well Analysis > Drilling Engineering (the
+`/offset-well-analysis/drilling-engineering` link, not the Engineering & Modeling
+one) and confirms the Deswanth names before acting. Its page, steps and feature
+live in the `Offset Well Analysis` folders. The section's Mark as Completed
+toggle is not touched.
+
+`Offset Well Analysis/No-Drilling-Surprises.feature` opens the same design, goes
+to Offset Well Analysis > Subsurface (the `/offset-well-analysis/subsurface`
+link) and expands No Drilling Surprises. It runs the same nine file scenarios
+(other existing files such as `DOS_121.png` are left untouched) plus a tenth
+that types `ಪೆದ್ದಿರೆಡ್ಡಿ ದೇಶವಂತ್ ರೆಡ್ಡಿ` into the editor, clicks the empty area to
+save it, clicks Translate, and verifies the text becomes Latin-script English
+(currently `Peddireddi Deshavant Reddy`, recorded as a `translation` annotation
+in the report). Any text already in the editor is deleted first, and that
+deletion is saved, so every run enters a real change and checks a real save
+request. Editor behavior worth knowing: input typed while the editor lock is
+being acquired can be discarded, so the test retries until the text sticks;
+the app only saves when the content changed; clicking out of the editor
+(including clicking Translate) saves the text as it was before translating; the
+translated result is not saved; and saving can switch the section's Mark as
+Completed status to In Progress, which the tests do not change back.
+
+`Engineering & Modeling/Drilling Engineering/Section-Objectives-and-KPIs.feature`
+opens Engineering & Modeling > Drilling Engineering (the
+`/engineering-modeling/drilling-engineering` link, not the Offset Well Analysis
+one), selects the `6.250 (in) Section` tab and expands Section Objectives and
+KPIs. Each hole-section tab has its own copy of the panel, so the panel is
+scoped to the selected tab. One scenario enters the Kannada text in the
+Objectives editor, clicks the empty area (the editor's title) to save it,
+clicks Translate and checks the English result, then does the same in the KPI
+editor, and finally reloads the design to check both saved texts persisted.
+Existing text is deleted first, as above. The Objectives, KPI and No Drilling
+Surprises editors share `src/pages/rich-text-editor.ts`. The Copy to Domains /
+Copy to Sections buttons and Mark as Completed are not touched, and saving
+moves a Not Started section to In Progress.
+
+`Engineering & Modeling/Drilling Engineering/Risk-Management-Prognosis.feature`
+opens the same `6.250 (in) Section` tab and expands Risk Management +
+Prognosis, then clicks Add Row, which opens a side drawer. It enters Risk
+`Sensor` and Consequences `SAMPLE`, sets Initial RPC to `II — Significant` /
+`C — Occasional`, edits and confirms Prevention and Mitigation (`SAMPLE`; the
+text boxes are read-only until Edit is clicked and only count once confirmed),
+sets Residual RPC to `III — Marginal` / `D — Remote`, and clicks Add. Every
+field is mandatory, so the scenario checks Add stays disabled until the
+Residual RPC is set, then enabled. It then checks the new table row column by
+column, including the RPC score badges, which must match the scores the drawer
+showed. Each run adds one more row, so repeated runs leave duplicate `Sensor`
+rows. The Generate Risks, Copy to Sections and Copy to Domains buttons and Mark
+as Completed are not touched, and adding a risk moves the section to In
+Progress. This feature and Section Objectives and KPIs share
+`drilling-engineering-section.page.ts` for the tab and panel handling.
+
+`Offset Well Analysis/Offset-Well-Run-Details.feature` opens the same section
+path, expands Offset Well Run Details, and selects `# 863`, `#1`, `#119`, `#867`
+and `10150-11400 RA SUA; LL&E #1` in the Well Name dropdown (exact option names;
+note the space in `# 863`). The list holds about 3,000 wells, so options are
+found through its search box. The app reloads data after a selection and may
+close the dropdown, so each well reopens it and checks its state first. The
+scenario verifies `5 items selected`, `Selected: 5 wells` and one tab per well.
+It dismisses the bottom "Latest release update" notice if it is covering the
+dropdown, and it works whether or not a well was preselected.
+
+`Offset Well Analysis/DDR-Summary.feature` does the same in the DDR Summary
+section: it opens the Select wells to view data dropdown and selects
+`25/11-BT-3`, `AFRAA-1`, `ARMB-002R1S1`, `BISBITA_SUR-01-ST2`,
+`Business Insights Well - LOL!` and `Business Insights Well - LOL!!!` (exact
+option names from the app), then verifies `6 items selected`,
+`Selected: 6 wells` and the `NPT Summary` tab plus one tab per well. The
+Country and Company filters are left alone. Both well-selection pages share
+`well-multiselect-panel.page.ts`.
+
 `CF-Ladder-TC-Plot.feature` covers eight file-management scenarios for each of
 CF Plot, Ladder Plot, and TC Plot (24 total). It uses the same verified design
 and shared file helpers, with each uploader and file row scoped to its exact

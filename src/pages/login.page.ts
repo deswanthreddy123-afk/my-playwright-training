@@ -100,6 +100,41 @@ export class LoginPage {
     await expect(this.page).toHaveURL(url.href);
   }
 
+  async openOffsetWellAnalysisDrillingEngineering(): Promise<void> {
+    await this.openSidebarPage('Offset Well Analysis', 'offset-well-analysis', 'drilling-engineering');
+  }
+
+  async openOffsetWellAnalysisSubsurface(): Promise<void> {
+    await this.openSidebarPage('Offset Well Analysis', 'offset-well-analysis', 'subsurface');
+  }
+
+  async openEngineeringModelingDrillingEngineering(): Promise<void> {
+    await this.openSidebarPage('Engineering & Modeling', 'engineering-modeling', 'drilling-engineering');
+  }
+
+  private async openSidebarPage(group: string, groupPath: string, subPage: string): Promise<void> {
+    await this.openDesignTrajectory();
+    // Offset Well Analysis and Engineering & Modeling have sub-links with the same names,
+    // so match the full path rather than the link text.
+    const link = this.page.locator(`a[href$="/${groupPath}/${subPage}"]`);
+    if (!(await link.isVisible())) {
+      await this.page.getByText(group, { exact: true }).first().click();
+    }
+    await link.click();
+    await expect(this.page).toHaveURL(new RegExp(`/${groupPath}/${subPage}`));
+    await expect(this.page.locator('.well-select').getByRole('combobox')).toHaveText(
+      'Deswanth Well',
+      { timeout: 30000 },
+    );
+    await expect(this.page.locator('.wellbore-select').getByRole('combobox')).toHaveText(
+      'Deswanth Wellbore',
+      { timeout: 30000 },
+    );
+    await expect(this.page.locator('.design-name-value')).toHaveText('Deswanth Design', {
+      timeout: 30000,
+    });
+  }
+
   async login(): Promise<void> {
     const emailField = this.page.getByPlaceholder(this.emailInput);
     const isAuthenticated = () => /\/if\/user(?:\/|$)|\/library(?:\/|$)/.test(
